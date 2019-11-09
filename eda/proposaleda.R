@@ -11,11 +11,11 @@ library(ggplot2)
 library(ggmap)
 library(RColorBrewer)
 
-register_google(key = 'AIzaSyC0r9WOCNYUzgqgNAYHLQwKlhu8M5Kr_pE')
 
-wqdat = read.csv("C:/Users/iansa/OneDrive/Desktop/WaterAnalysisProject/data/waterquality2018update_csv.csv")
-toxdat = read.csv("C:/Users/iansa/OneDrive/Desktop/WaterAnalysisProject/data/tri_2017_co.csv")
-ahpdat = read.csv("C:/Users/iansa/OneDrive/Desktop/WaterAnalysisProject/data/AffordableHousingProjects_CARH_20180530 - AffordableHousingProjects_CARH_20180530.csv")
+wqdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/waterquality2018update_csv.csv")
+toxdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/tri_2017_co.csv")
+ahpdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/AffordableHousingProjects_CARH_20180530 - AffordableHousingProjects_CARH_20180530.csv")
+fsdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/food_stores.csv")
 
 toxdat2 = toxdat %>%
   filter(X12..LATITUDE > min(wqdat$latitude)) %>% 
@@ -36,7 +36,21 @@ ahpdat2 = ahpdat %>%
 ahpdat2$longitude = as.numeric(as.character(ahpdat2$longitude))
 ahpdat2$latitude = as.numeric(as.character(ahpdat2$latitude))
 
-get_googlemap(center = c(mean(wqdat$longitude), mean(wqdat$latitude)), zoom = 11) %>%
+fsdat2 = fsdat %>%
+  filter(CITY %in% 'Denver') %>% 
+  filter(STORE_TYPE %in% c('Small Grocery Store', 'Supercenter', 'Superette', 'Supermarket', 'Warehouse Club Store'))
+
+dmap = get_googlemap(center = c(mean(wqdat$longitude), mean(wqdat$latitude)), zoom = 11)
+dmapsat = get_googlemap(center = c(mean(wqdat$longitude), mean(wqdat$latitude)), zoom = 11, maptype = 'satellite')
+
+dmapsat %>%
+  ggmap() +
+  geom_point(data = fsdat2, mapping = aes(x = POINT_X, y = POINT_Y),
+             color = brewer.pal(n = 8, name = 'Set2')[2]) +
+  geom_point(data = ahpdat2, mapping = aes(x = longitude, y = latitude),
+             color = brewer.pal(n = 8, name = 'Set2')[3])
+
+dmap %>%
   ggmap() +
   geom_point(data = wqdat, mapping = aes(x = longitude, y = latitude),
              color = brewer.pal(n = 8, name = 'Set2')[2]) +
