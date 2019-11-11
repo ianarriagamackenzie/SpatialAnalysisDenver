@@ -11,11 +11,34 @@ library(ggplot2)
 library(ggmap)
 library(RColorBrewer)
 
+display.brewer.all(colorblindFriendly = TRUE)
 
 wqdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/waterquality2018update_csv.csv")
 toxdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/tri_2017_co.csv")
 ahpdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/AffordableHousingProjects_CARH_20180530 - AffordableHousingProjects_CARH_20180530.csv")
 fsdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/food_stores.csv")
+ffdat1 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/FastFoodRestaurants.csv")
+ffdat2 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/Datafiniti_Fast_Food_Restaurants.csv")
+ffdat3 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/Datafiniti_Fast_Food_Restaurants_May19.csv")
+
+ffdat1c = ffdat1 %>%
+  filter(province %in% 'CO') %>% 
+  filter(city %in% 'Denver') %>% 
+  select(latitude, longitude, name)
+ffdat2c = ffdat2 %>%
+  filter(province %in% 'CO') %>% 
+  filter(city %in% 'Denver') %>% 
+  select(latitude, longitude, name)
+ffdat3c = ffdat3 %>%
+  filter(province %in% 'CO') %>% 
+  filter(city %in% 'Denver') %>%
+  select(latitude, longitude, name)
+
+ffdatm = rbind(ffdat1c, ffdat2c, ffdat3c)
+ffdatm = ffdatm %>% 
+  distinct() %>% 
+  filter(longitude > (min(fsdat2$POINT_X) - 0.01))
+
 
 toxdat2 = toxdat %>%
   filter(X12..LATITUDE > min(wqdat$latitude)) %>% 
@@ -43,12 +66,14 @@ fsdat2 = fsdat %>%
 dmap = get_googlemap(center = c(mean(wqdat$longitude), mean(wqdat$latitude)), zoom = 11)
 dmapsat = get_googlemap(center = c(mean(wqdat$longitude), mean(wqdat$latitude)), zoom = 11, maptype = 'satellite')
 
-dmapsat %>%
+dmap %>%
   ggmap() +
   geom_point(data = fsdat2, mapping = aes(x = POINT_X, y = POINT_Y),
-             color = brewer.pal(n = 8, name = 'Set2')[2]) +
+             color = brewer.pal(n = 10, name = 'Paired')[2]) +
   geom_point(data = ahpdat2, mapping = aes(x = longitude, y = latitude),
-             color = brewer.pal(n = 8, name = 'Set2')[3])
+             color = brewer.pal(n = 10, name = 'Paired')[8]) +
+  geom_point(data = ffdatm, mapping = aes(x = longitude, y = latitude),
+             color = brewer.pal(n = 10, name = 'Paired')[6])
 
 dmap %>%
   ggmap() +
