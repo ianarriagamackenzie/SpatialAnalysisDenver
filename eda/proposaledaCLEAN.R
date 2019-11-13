@@ -11,6 +11,10 @@ library(viridis)
 library(ggplot2)
 library(ggmap)
 library(RColorBrewer)
+library(rgdal)
+library(broom)
+library(tidyr)
+library(gridExtra)
 
 display.brewer.all(colorblindFriendly = TRUE)
 
@@ -20,11 +24,21 @@ ffdat1 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/FastFood
 ffdat2 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/Datafiniti_Fast_Food_Restaurants.csv")
 ffdat3 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/Datafiniti_Fast_Food_Restaurants_May19.csv")
 
+mapshape = readOGR(
+  dsn = 'C:/Users/iansa/OneDrive/Documents/GitHub/spatial_analysis/SpatialAnalysisDenver/data/NBshapefile',
+  layer = 'statistical_neighborhoods'
+)
+
+mapshapegg = tidy(mapshape)
+
+ggplot() +
+  geom_polygon(data = mapshapegg, aes( x = long, y = lat, group = group), fill= NA, color="black") +
+  theme_void() 
+
 fsdat2 = fsdat %>%
   filter(CITY %in% 'Denver') %>% 
   filter(STORE_TYPE %in% c('Small Grocery Store', 'Supercenter', 'Superette',
-                           'Supermarket', 'Warehouse Club Store', 'Dollar Store',
-                           'Discount Merchandise Market')) %>% 
+                           'Supermarket', 'Warehouse Club Store', 'Dollar Store')) %>% 
   select(STORE_NAME, POINT_X, POINT_Y) %>% 
   filter(!is.na(POINT_X)) %>% 
   filter(!is.na(POINT_Y))
@@ -68,14 +82,42 @@ dmapzoom = get_googlemap(center = c(mean(ahpdat3$longitude), mean(ahpdat3$latitu
 dmapsat = get_googlemap(center = c(mean(ahpdat3$longitude), mean(ahpdat3$latitude)),
                         zoom = 11, maptype = 'satellite')
 
-dmap %>%
+regplot = dmap %>%
   ggmap() +
   geom_point(data = ahpdat3, mapping = aes(x = longitude, y = latitude),
              color = brewer.pal(n = 10, name = 'Paired')[10]) +
   geom_point(data = fsdat2, mapping = aes(x = POINT_X, y = POINT_Y),
              color = brewer.pal(n = 12, name = 'Paired')[12]) +
   geom_point(data = ffdatm2, mapping = aes(x = longitude, y = latitude),
-             color = brewer.pal(n = 10, name = 'Paired')[6])
+             color = brewer.pal(n = 10, name = 'Paired')[6]) +
+  geom_polygon(data = mapshapegg, aes( x = long, y = lat, group = group), fill= NA, color="black")
+
+regplotfar = dmapfar %>%
+  ggmap() +
+  geom_point(data = ahpdat3, mapping = aes(x = longitude, y = latitude),
+             color = brewer.pal(n = 10, name = 'Paired')[10]) +
+  geom_point(data = fsdat2, mapping = aes(x = POINT_X, y = POINT_Y),
+             color = brewer.pal(n = 12, name = 'Paired')[12]) +
+  geom_point(data = ffdatm2, mapping = aes(x = longitude, y = latitude),
+             color = brewer.pal(n = 10, name = 'Paired')[6]) +
+  geom_polygon(data = mapshapegg, aes( x = long, y = lat, group = group), fill= NA, color="black")
+
+regplotzoom = dmapzoom %>%
+  ggmap() +
+  geom_point(data = ahpdat3, mapping = aes(x = longitude, y = latitude),
+             color = brewer.pal(n = 10, name = 'Paired')[10]) +
+  geom_point(data = fsdat2, mapping = aes(x = POINT_X, y = POINT_Y),
+             color = brewer.pal(n = 12, name = 'Paired')[12]) +
+  geom_point(data = ffdatm2, mapping = aes(x = longitude, y = latitude),
+             color = brewer.pal(n = 10, name = 'Paired')[6]) +
+  geom_polygon(data = mapshapegg, aes( x = long, y = lat, group = group), fill= NA, color="black")
+
+grid.arrange(
+  regplotzoom,
+  regplot,
+  regplotfar,
+  ncol = 3
+)
 
 unique(fsdat2$STORE_NAME)
 unique(ffdatm2$name)

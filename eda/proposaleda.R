@@ -10,6 +10,8 @@ library(viridis)
 library(ggplot2)
 library(ggmap)
 library(RColorBrewer)
+library(rgdal)
+library(broom)
 
 display.brewer.all(colorblindFriendly = TRUE)
 
@@ -20,6 +22,12 @@ fsdat = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/food_stor
 ffdat1 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/FastFoodRestaurants.csv")
 ffdat2 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/Datafiniti_Fast_Food_Restaurants.csv")
 ffdat3 = read.csv("~/GitHub/spatial_analysis/SpatialAnalysisDenver/data/Datafiniti_Fast_Food_Restaurants_May19.csv")
+
+mapshape = readOGR(
+  dsn = 'C:/Users/iansa/OneDrive/Documents/GitHub/spatial_analysis/SpatialAnalysisDenver/data/NBshapefile',
+  layer = 'statistical_neighborhoods'
+)
+
 
 ffdat1c = ffdat1 %>%
   filter(province %in% 'CO') %>% 
