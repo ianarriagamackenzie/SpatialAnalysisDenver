@@ -1,4 +1,4 @@
-## water quality proposal eda
+## Affordable Housing, Fast Food, Grocery Proposal
 ## CLEANED VER
 ## ian arriaga mackenzie
 
@@ -39,7 +39,7 @@ fsdat2 = fsdat %>%
   filter(CITY %in% 'Denver') %>% 
   filter(STORE_TYPE %in% c('Small Grocery Store', 'Supercenter', 'Superette',
                            'Supermarket', 'Warehouse Club Store', 'Dollar Store')) %>% 
-  select(STORE_NAME, POINT_X, POINT_Y) %>% 
+  dplyr::select(STORE_NAME, POINT_X, POINT_Y) %>% 
   filter(!is.na(POINT_X)) %>% 
   filter(!is.na(POINT_Y))
 
