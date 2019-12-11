@@ -22,6 +22,7 @@ library(smacpod)
 library(spatialreg)
 library(proxy)
 library(geosphere)
+library(splancs)
 
 display.brewer.all(colorblindFriendly = TRUE)
 
@@ -86,12 +87,17 @@ AHGSppp = as.ppp(AHGSrr, W = mapshapesub)
 AHGSpr = logrr(AHGSppp, case = 2, nsim = 499, level = 0.95)
 plot(AHGSpr)
 
+
 summary(m1 <- glm(AHcount ~ FFcount + GScount, family = "poisson", data = CountDat))
+summary(m1 <- glm(AHcount ~ FFcount + GScount + Pop + MedHHInc, family = "poisson", data = CountDat))
 
 summary(m1 <- glm(GScount ~ AHcount, family = "poisson", data = CountDat))
 summary(m1 <- glm(FFcount ~ AHcount, family = "poisson", data = CountDat))
 summary(m1 <- glm(AHcount ~ FFcount, family = "poisson", data = CountDat))
 
+summary(m1 <- glm.nb(AHcount ~ FFcount + GScount, data = CountDat))
+
+summary(m1 <- glm.nb(AHcount ~ FFcount + GScount + Pop + MedHHInc, data = CountDat))
 
 distmat = dist(AHP, GSP)
 distmat[1,]
@@ -117,3 +123,24 @@ ggplot(pointframe) +
   labs(title = NULL, x = NULL, y = NULL) +
   coord_equal() + 
   theme(axis.text = element_blank())
+
+
+r <- seq(0, 0.0496, len = 99)
+n = 99
+p = 0.05
+
+AHppp = as.ppp(AHP, W = mapshapesub)
+AHenv = envelope(AHppp, fun = 'Lest', nsim = n, correction = 'Ripley', nrank = (p * (n + 1)))
+plot(AHenv, . - r ~ r, legend = FALSE, main = NULL, ylab = expression(hat('L')), xlab = 'Distance (h)')
+
+{plot(density(AHppp, sigma = bw.scott(AHppp)), main = NULL)
+  contour(density(AHppp, sigma = bw.scott(AHppp)), add = TRUE)
+  points(AHppp, pch = 20)}
+
+GSppp = as.ppp(GSP, W = mapshapesub)
+GSenv = envelope(GSppp, fun = 'Lest', nsim = n, correction = 'Ripley', nrank = (p * (n + 1)))
+plot(GSenv, . - r ~ r, legend = FALSE, main = NULL, ylab = expression(hat('L')), xlab = 'Distance (h)')
+
+{plot(density(GSppp, sigma = bw.scott(GSppp)), main = NULL)
+  contour(density(GSppp, sigma = bw.scott(GSppp)), add = TRUE)
+  points(GSppp, pch = 20)}

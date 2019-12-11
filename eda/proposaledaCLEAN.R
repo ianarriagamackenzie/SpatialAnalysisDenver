@@ -1,6 +1,5 @@
 ## Affordable Housing, Fast Food, Grocery Proposal
 ## CLEANED VER
-## ian arriaga mackenzie
 
 library(dplyr)
 library(tidyverse)
